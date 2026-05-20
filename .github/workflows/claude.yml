@@ -23,7 +23,26 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Project setup
+        run: |
+          npm run setup
+          npm run dev:daemon
+
       - name: Run Claude Code
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_tools: "Bash,Edit,Read,Write,Glob,Grep,mcp__playwright__browser_navigate,mcp__playwright__browser_screenshot,mcp__playwright__browser_click,mcp__playwright__browser_type,mcp__playwright__browser_wait_for"
+          custom_instructions: |
+            The project is already set up with all dependencies installed and the dev server running at http://localhost:3000.
+            Do not run npm install, npm run setup, or any database migration commands.
+            Use the Playwright MCP tools to interact with the running app when verifying UI changes.
+          mcp_config: |
+            {
+              "mcpServers": {
+                "playwright": {
+                  "command": "npx",
+                  "args": ["@playwright/mcp@latest"]
+                }
+              }
+            }
